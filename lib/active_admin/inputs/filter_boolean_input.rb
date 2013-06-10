@@ -20,11 +20,7 @@ module ActiveAdmin
       end
 
       def checked?
-        if defined? ActionView::Helpers::InstanceTag
-          object && ActionView::Helpers::InstanceTag.check_box_checked?(object.send(search_method), checked_value)
-        else
-          object && boolean_checked?(object.send(search_method), checked_value)
-        end
+        object && boolean_checked?(object.send(search_method), checked_value)
       end
 
       def input_html_options

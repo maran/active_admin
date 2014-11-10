@@ -5,7 +5,11 @@ module ActiveAdmin
       DISPLAY_NAME_FALLBACK = ->{
         name, klass = "", self.class
         name << klass.model_name.human         if klass.respond_to? :model_name
-        name << " ##{send(klass.primary_key)}" if klass.respond_to? :primary_key
+
+        # When using Mongoid primary_key can be nil so respond_to will return true but send will fail
+        unless defined?(::Mongoid) || object.class.include?(Mongoid::Document)
+          name << " ##{send(klass.primary_key)}" if klass.respond_to?(:primary_key)
+        end
         name.present? ? name : to_s
       }
       def DISPLAY_NAME_FALLBACK.inspect
@@ -25,7 +29,7 @@ module ActiveAdmin
         @@display_name_methods_cache ||= {}
         @@display_name_methods_cache[resource.class] ||= begin
           methods = active_admin_application.display_name_methods - association_methods_for(resource)
-          method  = methods.detect{ |method| resource.respond_to? method }
+          method  = methods.detect{ |m| resource.respond_to? m }
 
           if method != :to_s || resource.method(method).source_location
             method
